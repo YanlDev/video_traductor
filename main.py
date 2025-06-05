@@ -7,11 +7,12 @@ Programa completamente automático:
 Ingresa URL → Obtén video traducido
 
 Flujo automático:
-URL → Descarga → Extrae audio → Separa audio → (próximamente: transcribe → traduce → TTS → video final)
+URL → Descarga → Extrae audio → Separa audio → Transcribe → Traduce → TTS → Video final
 """
 
 import os
 import sys
+import asyncio
 from datetime import datetime
 
 def mostrar_banner():
@@ -20,7 +21,7 @@ def mostrar_banner():
     print("🎬 TRADUCTOR AUTOMÁTICO DE VIDEOS AL ESPAÑOL")
     print("=" * 60)
     print("🎯 Ingresa una URL → Proceso completamente automático")
-    print("🚀 Descarga → Audio → Separación → Listo para transcripción")
+    print("🚀 Descarga → Audio → Separación → Transcripción → Traducción → TTS → Video final")
     print("=" * 60)
     print()
 
@@ -99,20 +100,22 @@ def validar_url_youtube(url):
     
     return any(dominio in url.lower() for dominio in dominios_validos)
 
-def proceso_automatico(url):
+async def proceso_automatico(url):
     """
-    Proceso completamente automático de 5 pasos:
+    Proceso completamente automático de 7 pasos:
     1. Descarga video
     2. Extrae audio 
     3. Separa música y voces
     4. Transcribe audio
     5. Traduce al español
+    6. Genera audio en español (TTS)
+    7. Genera video final
     """
     print("🚀 INICIANDO PROCESO AUTOMÁTICO")
     print("=" * 40)
     
     # PASO 1: DESCARGA
-    print("🔄 Paso 1/5: Descargando video...")
+    print("🔄 Paso 1/7: Descargando video...")
     
     try:
         import download_video
@@ -149,7 +152,7 @@ def proceso_automatico(url):
         return False
     
     # PASO 2: EXTRACCIÓN DE AUDIO
-    print(f"\n🔄 Paso 2/5: Extrayendo audio...")
+    print(f"\n🔄 Paso 2/7: Extrayendo audio...")
     
     try:
         import extract_audio
@@ -187,7 +190,7 @@ def proceso_automatico(url):
         return False
     
     # PASO 3: SEPARACIÓN DE AUDIO
-    print(f"\n🔄 Paso 3/5: Separando música y voces...")
+    print(f"\n🔄 Paso 3/7: Separando música y voces...")
     
     try:
         import separate_audio
@@ -209,7 +212,7 @@ def proceso_automatico(url):
         print(f"⚠️  Error en separación: {e}")
     
     # PASO 4: TRANSCRIPCIÓN DE AUDIO
-    print(f"\n🔄 Paso 4/5: Transcribiendo audio...")
+    print(f"\n🔄 Paso 4/7: Transcribiendo audio...")
     
     try:
         import transcribe_audio
@@ -233,7 +236,7 @@ def proceso_automatico(url):
         print(f"⚠️  Error en transcripción: {e}")
     
     # PASO 5: TRADUCCIÓN AL ESPAÑOL
-    print(f"\n🔄 Paso 5/5: Traduciendo al español...")
+    print(f"\n🔄 Paso 5/7: Traduciendo al español...")
     
     try:
         import translate_text
@@ -258,6 +261,75 @@ def proceso_automatico(url):
         print("💡 Para traducción instala: pip install openai python-dotenv googletrans==4.0.0-rc1")
     except Exception as e:
         print(f"⚠️  Error en traducción: {e}")
+    
+    # PASO 6: GENERACIÓN DE AUDIO EN ESPAÑOL (TTS)
+    print(f"\n🔄 Paso 6/7: Generando audio en español...")
+    
+    try:
+        import generate_spanish_audio
+        
+        print("\n🎭 ¿Qué voz prefieres?")
+        print("1. 👩 Mujer (recomendado)")  
+        print("2. 👨 Hombre")
+        genero = input("Elige (1/2): ").strip()
+        genero_elegido = 'Male' if genero == '2' else 'Female'
+        
+        resultado_tts = await generate_spanish_audio.generar_automatico(ruta_proyecto, genero_elegido)
+    
+        
+        if resultado_tts:
+            print("✅ Audio en español generado")
+            if 'voz_usada' in resultado_tts:
+                voz = resultado_tts['voz_usada']
+                print(f"   🎙️ Voz: {voz['nombre']} ({voz['locale']})")
+            
+            if 'archivo_audio' in resultado_tts:
+                try:
+                    tamaño = os.path.getsize(resultado_tts['archivo_audio']) / 1024 / 1024
+                    print(f"   📊 Tamaño: {tamaño:.1f} MB")
+                except:
+                    pass
+        else:
+            print("⚠️  Generación de audio falló")
+            
+    except ImportError:
+        print("⚠️  Módulo generate_spanish_audio no disponible")
+        print("💡 Para TTS instala: pip install edge-tts")
+    except Exception as e:
+        print(f"⚠️  Error en generación de audio: {e}")
+    
+    # PASO 7: GENERACIÓN DE VIDEO FINAL
+    print(f"\n🔄 Paso 7/7: Generando video final...")
+    
+    try:
+        import combine_audio
+        
+        resultado_video = combine_audio.procesar_proyecto_completo(ruta_proyecto)
+        
+        if resultado_video:
+            print("✅ Video final generado")
+            
+            # Buscar archivo de video final
+            carpeta_final = os.path.join(ruta_proyecto, "6_final")
+            if os.path.exists(carpeta_final):
+                videos_finales = [f for f in os.listdir(carpeta_final) 
+                                if f.lower().endswith(('.mp4', '.avi', '.mkv'))]
+                if videos_finales:
+                    video_final = os.path.join(carpeta_final, videos_finales[0])
+                    try:
+                        tamaño = os.path.getsize(video_final) / 1024 / 1024
+                        print(f"   📊 Tamaño: {tamaño:.1f} MB")
+                        print(f"   📁 Archivo: {videos_finales[0]}")
+                    except:
+                        pass
+        else:
+            print("⚠️  Generación de video final falló")
+            
+    except ImportError:
+        print("⚠️  Módulo combine_audio no disponible")
+        print("💡 Verifica que FFmpeg esté instalado")
+    except Exception as e:
+        print(f"⚠️  Error en generación de video: {e}")
     
     # RESUMEN FINAL
     print("\n🎉 PROCESAMIENTO COMPLETADO")
@@ -299,17 +371,54 @@ def proceso_automatico(url):
     else:
         print(f"🌐 Traducción: ❌")
     
+    # Verificar audio en español
+    carpeta_audio_es = os.path.join(ruta_proyecto, "5_audio_es")
+    if os.path.exists(carpeta_audio_es):
+        archivos_audio_es = [f for f in os.listdir(carpeta_audio_es) if f.endswith('.wav')]
+        if archivos_audio_es:
+            print(f"🎙️ Audio en español: ✅")
+        else:
+            print(f"🎙️ Audio en español: ❌")
+    else:
+        print(f"🎙️ Audio en español: ❌")
+    
+    # Verificar video final
+    carpeta_final = os.path.join(ruta_proyecto, "6_final")
+    if os.path.exists(carpeta_final):
+        archivos_finales = [f for f in os.listdir(carpeta_final) 
+                          if f.lower().endswith(('.mp4', '.avi', '.mkv'))]
+        if archivos_finales:
+            print(f"🎬 Video final: ✅")
+        else:
+            print(f"🎬 Video final: ❌")
+    else:
+        print(f"🎬 Video final: ❌")
+    
     print(f"📂 Ubicación: downloads/{nombre_proyecto}/")
     print()
-    print("🔄 Próximos pasos (en desarrollo):")
-    print("   6. Generar audio en español con TTS")
-    print("   7. Combinar con música original")
-    print("   8. Video final traducido")
+    
+    # Verificar si todo salió bien
+    if (os.path.exists(carpeta_separado) and 
+        os.path.exists(carpeta_transcripcion) and 
+        os.path.exists(carpeta_traduccion) and 
+        os.path.exists(carpeta_audio_es) and 
+        os.path.exists(carpeta_final)):
+        
+        videos_finales = [f for f in os.listdir(carpeta_final) 
+                         if f.lower().endswith(('.mp4', '.avi', '.mkv'))]
+        if videos_finales:
+            print("🎊 ¡TRADUCCIÓN COMPLETA!")
+            print("🎬 Tu video está 100% traducido al español")
+            print(f"📁 Video final: {videos_finales[0]}")
+        else:
+            print("🔄 Proceso casi completo - falta video final")
+    else:
+        print("🔄 Algunos pasos fallaron - revisa los mensajes arriba")
     
     return True
 
-def main():
-    """Función principal simplificada"""
+async def main_async():
+    """Función principal asíncrona"""
     # Limpiar pantalla
     os.system('cls' if os.name == 'nt' else 'clear')
     
@@ -339,18 +448,27 @@ def main():
     
     print()
     
-    # PROCESO AUTOMÁTICO SIMPLIFICADO
-    exito = proceso_automatico(url)
+    # PROCESO AUTOMÁTICO COMPLETO
+    exito = await proceso_automatico(url)
     
     if exito:
-        print("\n🎊 ¡PROCESO INICIAL COMPLETADO!")
-        print("🔮 Proyecto listo para transcripción y traducción")
+        print("\n🎊 ¡PROCESO COMPLETADO!")
+        print("🔮 Tu video traducido está listo")
     else:
         print("\n❌ Error en el proceso automático")
         print("💡 Verifica la URL e intenta de nuevo")
     
     # Pausa antes de terminar
     input("\nPresiona Enter para salir...")
+
+def main():
+    """Función principal que maneja asyncio"""
+    try:
+        asyncio.run(main_async())
+    except KeyboardInterrupt:
+        print("\n❌ Proceso cancelado por el usuario")
+    except Exception as e:
+        print(f"\n❌ Error inesperado: {e}")
 
 if __name__ == "__main__":
     main()
