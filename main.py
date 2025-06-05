@@ -268,6 +268,7 @@ async def proceso_automatico(url):
     try:
         import generate_spanish_audio
         
+        # PASO 6: En main.py esto ya funciona correctamente
         print("\n🎭 ¿Qué voz prefieres?")
         print("1. 👩 Mujer (recomendado)")  
         print("2. 👨 Hombre")

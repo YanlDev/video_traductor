@@ -224,7 +224,41 @@ def seleccionar_voz_automatica(voces):
     # Si no encuentra ninguna de las preferidas, usar la primera disponible
     return voces[0] if voces else None
 
-async def generar_automatico(ruta_proyecto):
+def seleccionar_voz_por_genero(voces, genero_preferido='Female'):
+    """Selecciona automáticamente una buena voz para el proyecto considerando género"""
+    # Prioridades: España > México > Argentina (por claridad y neutralidad)
+    prioridades = ['es-ES', 'es-MX', 'es-AR', 'es-CO']
+    
+    # Primero intentar encontrar voces del género preferido
+    for locale in prioridades:
+        voces_region = [v for v in voces if v['locale'] == locale and v['genero'] == genero_preferido]
+        
+        if voces_region:
+            return voces_region[0]
+    
+    # Si no encuentra del género preferido, buscar cualquiera de las regiones prioritarias
+    for locale in prioridades:
+        voces_region = [v for v in voces if v['locale'] == locale]
+        
+        if voces_region:
+            # Preferir del género solicitado si está disponible
+            voces_genero = [v for v in voces_region if v['genero'] == genero_preferido]
+            if voces_genero:
+                return voces_genero[0]
+            else:
+                return voces_region[0]
+    
+    # Fallback final: cualquier voz del género preferido
+    voces_genero_preferido = [v for v in voces if v['genero'] == genero_preferido]
+    if voces_genero_preferido:
+        return voces_genero_preferido[0]
+    
+    # Si todo falla, usar la primera disponible
+    return voces[0] if voces else None
+
+
+
+async def generar_automatico(ruta_proyecto, genero_preferido='Female'):
     """Función automática para generar audio desde el proceso principal"""
     try:
         if not verificar_edge_tts():
@@ -276,14 +310,14 @@ async def generar_automatico(ruta_proyecto):
             print("❌ No se encontraron voces en español")
             return None
         
-        # Seleccionar voz automáticamente
-        voz_seleccionada = seleccionar_voz_automatica(voces)
+        # Seleccionar voz automáticamente CON PREFERENCIA DE GÉNERO
+        voz_seleccionada = seleccionar_voz_por_genero(voces, genero_preferido)
         
         if not voz_seleccionada:
             print("❌ No se pudo seleccionar una voz")
             return None
         
-        print(f"🎙️ Voz seleccionada: {voz_seleccionada['nombre']} ({voz_seleccionada['locale']})")
+        print(f"🎙️ Voz seleccionada: {voz_seleccionada['nombre']} ({voz_seleccionada['locale']}) - {voz_seleccionada['genero']}")
         
         # Generar nombre del archivo de audio
         nombre_base = os.path.splitext(archivos_es[0])[0].replace('_es', '')
@@ -301,6 +335,7 @@ async def generar_automatico(ruta_proyecto):
             'archivo_traduccion': archivo_traduccion,
             'archivo_audio': archivo_audio,
             'voz_usada': voz_seleccionada,
+            'genero_solicitado': genero_preferido,
             'caracteres_procesados': len(texto_espanol),
             'timestamp': datetime.now().isoformat()
         }
