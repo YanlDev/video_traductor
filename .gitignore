@@ -5,6 +5,8 @@
 .env.production
 .env.test
 
+env/
+
 # Carpeta de descargas
 downloads/
 download/
