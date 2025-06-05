@@ -416,6 +416,14 @@ async def proceso_automatico(url):
     else:
         print("🔄 Algunos pasos fallaron - revisa los mensajes arriba")
     
+    # LIMPIEZA AUTOMÁTICA DE ARCHIVOS TEMPORALES
+    try:
+        import cleanup_temp_files
+        cleanup_temp_files.limpiar_proyecto(ruta_proyecto)
+        print("🧹 Archivos temporales eliminados")
+    except:
+        pass  # Si no está el módulo, continuar sin limpiar
+    
     return True
 
 async def main_async():
