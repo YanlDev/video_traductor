@@ -1,0 +1,34 @@
+# TRADUCTOR DE VIDEOS AL ESPAÑOL
+# ================================
+# Instalación: pip install -r requirements.txt
+
+# Video/Audio Processing
+yt-dlp>=2023.12.30          # Reemplazo moderno para youtube-dl
+moviepy>=1.0.3              # Procesamiento de video y audio
+ffmpeg-python>=0.2.0        # Wrapper para FFmpeg
+
+# Audio Processing & Separation
+librosa>=0.10.0             # Análisis y separación de audio
+soundfile>=0.12.1           # Lectura/escritura de archivos de audio
+scipy>=1.11.0               # Procesamiento científico (requerido por librosa)
+numpy>=1.24.0               # Arrays numéricos (compatible con librosa)
+
+# Speech Recognition
+openai-whisper>=20231117    # Transcripción local con Whisper
+
+# Translation Services
+openai>=1.35.0              # API de OpenAI (versión nueva)
+googletrans==4.0.0rc1       # Google Translate (versión específica que funciona)
+
+# Text-to-Speech
+edge-tts>=6.1.0             # Microsoft Edge TTS
+
+# Environment & Utils
+python-dotenv>=1.0.0        # Variables de entorno desde .env
+requests>=2.31.0            # Requests HTTP
+tqdm>=4.65.0                # Barras de progreso
+
+# Additional dependencies that might be needed
+certifi>=2023.0.0           # Certificados SSL
+urllib3>=2.0.0              # Librería HTTP
+charset-normalizer>=3.3.0   # Normalización de caracteres
